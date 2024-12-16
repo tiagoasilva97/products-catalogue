@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
@@ -21,18 +22,23 @@ public class ProductService {
 
 
     public List<ProductDTO> getAll(){
-        List<Product> listProducts = this.productRepository.findAll();
-        List<ProductDTO> productDTOS = new ArrayList<>();
-
-        for(Product product: listProducts){
-            productDTOS.add(productMapper.toDTO(product));
-        }
-
-        return productDTOS;
+        return this.productRepository.findAll()
+                .stream().map(productMapper::toDTO)
+                .collect(Collectors.toList());
 
     }
 
     public Optional<Product> getById(final Long id){
         return this.productRepository.findById(id);
+    }
+
+    public ProductDTO saveProduct(final ProductDTO productDTO) {
+        Product newAddedProduct = this.productRepository.save(productMapper.toEntity(productDTO));
+
+        if( newAddedProduct == null) {
+            return null;
+        }
+
+        return this.productMapper.toDTO(newAddedProduct);
     }
 }
